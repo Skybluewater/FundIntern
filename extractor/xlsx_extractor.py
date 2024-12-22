@@ -27,9 +27,7 @@ class XLSXExtractor(BaseExtractor):
         
         stock_infos_in = handle_sheet("调入")
         stock_infos_out = handle_sheet("调出")
-
-        self.stock_in = stock_infos_in
-        self.stock_out = stock_infos_out
+        return stock_infos_in, stock_infos_out
 
 
 if __name__ == "__main__":

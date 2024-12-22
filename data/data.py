@@ -11,7 +11,7 @@ class Announcement(Serializable):
     announcement_time: datetime
     id: str
     content: str
-    pdf: str
+    file_name: str
     valid_time: datetime
     announcement_set: 'AnnouncementSet'
 
@@ -21,7 +21,7 @@ class Announcement(Serializable):
             "ann_time": self.announcement_time.date().isoformat(),
             "id": self.id,
             "content": self.content,
-            "pdf": self.pdf,
+            "file_name": self.file_name,
             "valid_time": self.valid_time.date().isoformat() if self.valid_time else None,
         }
     

@@ -91,15 +91,16 @@ def annoucement_handler(announcement: Announcement):
             file_url = file_link.get_attribute("href")
             file_suffix = file_url.split(".")[-1]
 
-            def download_pdf():
+            def download_file():
                 response = requests.get(file_url)
                 if response.status_code == 200:
                     with open(f"{id}.{file_suffix}", "wb") as f:
                         f.write(response.content)
                     print(f"Downloaded File: {id}.{file_suffix}")
+                    announcement.file_name = f"{id}.{file_suffix}"
                 else:
                     print(f"Failed to download File: {file_url}")
-            # download_pdf()
+            download_file()
 
             def read_file():
                 response = requests.get(file_url)

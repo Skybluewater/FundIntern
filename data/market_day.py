@@ -27,14 +27,6 @@ class BaseMarketDay:
             dates.to_csv(file_path, index=False, header=False, encoding='utf-8')
     
     @staticmethod
-    def get_market_days(start_date: date, period: int):
-        if BaseMarketDay._market_days is None:
-            BaseMarketDay.__get_market_day()
-
-        start_date_str = start_date.isoformat()
-        
-    
-    @staticmethod
     def get_market_days(start_date: date, *args):
         if BaseMarketDay._market_days is None:
             BaseMarketDay.__get_market_day()

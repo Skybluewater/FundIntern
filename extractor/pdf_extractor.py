@@ -91,9 +91,8 @@ class PDFExtractor(BaseExtractor):
         # Reset index to remove the index column
         stock_infos_out = stock_infos.iloc[:, [0, 1]]
         stock_infos_in = stock_infos.iloc[:, [2, 3]]
-
-        self.stock_in = stock_infos_in
-        self.stock_out = stock_infos_out
+        
+        return stock_infos_in, stock_infos_out
 
 if __name__ == "__main__":
     with open("14501.pdf", "rb") as f:
