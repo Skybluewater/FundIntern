@@ -69,3 +69,4 @@ class Stock(Serializable):
 if __name__ == "__main__":
     stock = Stock("000001", start_date=date(2021, 1, 1), end_date=date(2021, 1, 10))
     print(stock.to_dict())
+    #checksshkey
