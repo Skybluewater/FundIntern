@@ -1,16 +1,34 @@
 import pandas as pd
 import akshare as ak
 from datetime import date
+from typing import List
+from dataclasses import dataclass
+from serializable import Serializable
 
-class Stock:
-    class StockPerDay():
+@dataclass
+class Stock(Serializable):
+    @dataclass
+    class StockPerDay(Serializable):
         def __init__(self, date, open, close, high, low, volume):
-            self.date = date
+            self.date: date = date
             self.open = open
             self.close = close
             self.high = high
             self.low = low
             self.volume = volume
+        
+        def to_dict(self):
+            return {
+                "日期": self.date.isoformat(),
+                "开盘": self.open,
+                "收盘": self.close,
+                "最高": self.high,
+                "最低": self.low,
+                "成交量": self.volume
+            }
+        
+        def from_dict(self, dictionary):
+            return super().from_dict(dictionary)
     
     def __init__(self, stock_code: str, **kwargs):
         self.stock_code = stock_code
@@ -37,3 +55,17 @@ class Stock:
         end_date_str = end_date.strftime('%Y%m%d')
         stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="")
         return stock_zh_a_hist_df
+
+    def to_dict(self):
+        return {
+            "stock_code": self.stock_code,
+            "stock_name": self.stock_name,
+            "days": [day.to_dict() for day in self.days]
+        }
+    
+    def from_dict(self, dictionary):
+        return super().from_dict(dictionary)
+
+if __name__ == "__main__":
+    stock = Stock("000001", start_date=date(2021, 1, 1), end_date=date(2021, 1, 10))
+    print(stock.to_dict())
