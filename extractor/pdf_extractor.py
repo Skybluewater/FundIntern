@@ -62,7 +62,7 @@ class PDFExtractor(BaseExtractor):
             index_texts = texts
 
             if self.announcement != None:
-                index_name = self.announcement.ann_set.index_name
+                index_name = self.announcement.announcement_set.index_name
             else:
                 index_name = "上证50"
             
@@ -91,8 +91,9 @@ class PDFExtractor(BaseExtractor):
         # Reset index to remove the index column
         stock_infos_out = stock_infos.iloc[:, [0, 1]]
         stock_infos_in = stock_infos.iloc[:, [2, 3]]
-        return stock_infos_in, stock_infos_out
 
+        self.stock_in = stock_infos_in
+        self.stock_out = stock_infos_out
 
 if __name__ == "__main__":
     with open("14501.pdf", "rb") as f:

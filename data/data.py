@@ -3,30 +3,33 @@
 from dataclasses import dataclass
 from typing import List, Any
 from datetime import datetime
+from data.serializable import Serializable
 
 @dataclass
-class Announcement:
+class Announcement(Serializable):
     headline: str
-    ann_time: datetime
+    announcement_time: datetime
     id: str
     content: str
     pdf: str
     valid_time: datetime
-    ann_set: 'AnnouncementSet'
+    announcement_set: 'AnnouncementSet'
 
     def to_dict(self):
         return {
             "headline": self.headline,
-            "ann_time": self.ann_time.date().isoformat(),
+            "ann_time": self.announcement_time.date().isoformat(),
             "id": self.id,
             "content": self.content,
             "pdf": self.pdf,
-            # "valid_time": self.valid_time.date().isoformat(),
+            "valid_time": self.valid_time.date().isoformat() if self.valid_time else None,
         }
     
+    def from_dict(self, dictionary):
+        pass
 
 @dataclass
-class AnnouncementSet:
+class AnnouncementSet(Serializable):
     index_name: str
     total: int
     pageSize: int
@@ -45,3 +48,6 @@ class AnnouncementSet:
             "status": self.status,
             "announcements": [ann.to_dict() for ann in self.announcements]
         }
+    
+    def from_dict(self, dictionary):
+        pass

@@ -6,7 +6,7 @@ class XLSXExtractor(BaseExtractor):
         super().__init__(announcement)
     
     def extract_stock_info(self, file_handler):
-        index_name = self.announcement.ann_set.index_name
+        index_name = self.announcement.announcement_set.index_name
         # index_name = "上证50"
 
         def handle_sheet(sheet_name):
@@ -27,7 +27,9 @@ class XLSXExtractor(BaseExtractor):
         
         stock_infos_in = handle_sheet("调入")
         stock_infos_out = handle_sheet("调出")
-        return stock_infos_in, stock_infos_out
+
+        self.stock_in = stock_infos_in
+        self.stock_out = stock_infos_out
 
 
 if __name__ == "__main__":

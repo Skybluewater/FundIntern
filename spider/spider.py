@@ -46,9 +46,9 @@ def get_announcement(index_name: str, period: str = "5y") -> AnnouncementSet:
             for item in content["data"]:
                 if item["itemType"] != "announcement" or "指数定期调整结果的公告" not in item["headline"]:
                     continue
-                ann = Announcement(item["headline"], datetime.strptime(item["itemDate"], "%Y-%m-%d"), item["id"], "", "", None, set)
-                set.announcements.append(ann)
-                annoucement_handler(ann)
+                announcement = Announcement(item["headline"], datetime.strptime(item["itemDate"], "%Y-%m-%d"), item["id"], "", "", None, set)
+                set.announcements.append(announcement)
+                annoucement_handler(announcement)
         
         else:
             print("Failed to retrieve data from CSIndex website.")
@@ -58,18 +58,33 @@ def get_announcement(index_name: str, period: str = "5y") -> AnnouncementSet:
     return set
 
 
-def annoucement_handler(ann: Announcement):
-    id = ann.id
+def annoucement_handler(announcement: Announcement):
+    id = announcement.id
     url = f"https://www.csindex.com.cn/zh-CN/indices/index-detail/000016#/about/newsDetail?id={id}"
+    
     print("Handling ID: ", id)
     driver.get(url)
+    
     try:
         # Wait for the page to load and find the element
         import time
         time.sleep(1)
         driver.implicitly_wait(2)
         weditor = driver.find_element(By.CLASS_NAME, "weditor")
-        ann.content = weditor.text
+        announcement.content = weditor.text
+
+        import re
+        
+        pattern = re.compile(r"\d{4}.\d+.\d+.")
+        match = pattern.search(announcement.content)
+        if not match:
+            pattern = re.compile(r"\d{4}年\d+月\d+日")
+            match = pattern.search(announcement.content)
+        if match:
+            chinese_date = match.group()
+            english_date = chinese_date.replace("年", "-").replace("月", "-").replace("日", "")
+            announcement.valid_time = datetime.strptime(english_date, "%Y-%m-%d")
+
         # Check for PDF link
         file_link = weditor.find_element(By.XPATH, ".//a[contains(@href, '.pdf') or contains(@href, '.xlsx')]")
         if file_link:
@@ -97,10 +112,10 @@ def annoucement_handler(ann: Announcement):
             file_content = read_file()
 
             if file_suffix == "pdf":
-                pdf_extractor = PDFExtractor(ann)    
+                pdf_extractor = PDFExtractor(announcement)    
                 pdf_extractor.extract_stock_info(file_content)
             elif file_suffix == "xlsx":
-                xlsx_extractor = XLSXExtractor(ann)
+                xlsx_extractor = XLSXExtractor(announcement)
                 xlsx_extractor.extract_stock_info(file_content)
 
     except Exception as e:
@@ -118,7 +133,7 @@ def main():
     if announcement_set:
         announcement_json = json.dumps(announcement_set.to_dict(), ensure_ascii=False, indent=4, cls=DateTimeEncoder)
         # save the json file
-        with open("announcement.json", "w") as f:
+        with open("announcement.json", "w", encoding='utf-8') as f:
             f.write(announcement_json)
 
 if __name__ == "__main__":
