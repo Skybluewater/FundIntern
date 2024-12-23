@@ -2,7 +2,7 @@ import requests
 import json
 from datetime import datetime
 from dataclasses import asdict
-from data.data import Announcement, AnnouncementSet
+from data.announcement import Announcement, AnnouncementSet
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -129,13 +129,20 @@ class DateTimeEncoder(json.JSONEncoder):
             return obj.date().isoformat()
         return super().default(obj)
 
-def main():
-    announcement_set = get_announcement("上证50")
+def main(name):
+    announcement_set = get_announcement(name)
     if announcement_set:
         announcement_json = json.dumps(announcement_set.to_dict(), ensure_ascii=False, indent=4, cls=DateTimeEncoder)
         # save the json file
-        with open("announcement.json", "w", encoding='utf-8') as f:
+        with open(f"{name}.json", "w", encoding='utf-8') as f:
             f.write(announcement_json)
 
 if __name__ == "__main__":
-    main()
+    def parse_args():
+        import argparse
+        parser = argparse.ArgumentParser(description="Fetch and process announcements.")
+        parser.add_argument("--name", type=str, required=True, help="Index name to search for announcements.")
+        return parser.parse_args()
+
+    args = parse_args()
+    main(args.name)
