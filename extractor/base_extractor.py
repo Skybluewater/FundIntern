@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from data.announcement import Announcement
 from data.serializable import Serializable
 
 class BaseExtractor(Serializable, ABC):
-    def __init__(self, announcement: Announcement):
+    def __init__(self, announcement):
         self.announcement = announcement
         self.stock_in = None
         self.stock_out = None

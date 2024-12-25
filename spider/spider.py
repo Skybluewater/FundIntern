@@ -44,7 +44,7 @@ def get_announcement(index_name: str, period: str = "5y") -> AnnouncementSet:
                 total_page = content["size"]
             
             for item in content["data"]:
-                if item["itemType"] != "announcement" or "指数定期调整结果的公告" not in item["headline"]:
+                if item["itemType"] != "announcement" or not any(keyword in item["headline"] for keyword in ["指数定期调整结果的公告", "指数样本的公告"]):
                     continue
                 announcement = Announcement(item["headline"], datetime.strptime(item["itemDate"], "%Y-%m-%d"), item["id"], "", "", None, set)
                 set.announcements.append(announcement)
@@ -72,6 +72,7 @@ def annoucement_handler(announcement: Announcement):
         driver.implicitly_wait(2)
         weditor = driver.find_element(By.CLASS_NAME, "weditor")
         announcement.content = weditor.text
+        stock_infos_in, stock_infos_out = None, None
 
         import re
         
@@ -114,10 +115,11 @@ def annoucement_handler(announcement: Announcement):
 
             if file_suffix == "pdf":
                 pdf_extractor = PDFExtractor(announcement)    
-                pdf_extractor.extract_stock_info(file_content)
+                stock_infos_in, stock_infos_out = pdf_extractor.extract_stock_info(file_content)
             elif file_suffix == "xlsx":
                 xlsx_extractor = XLSXExtractor(announcement)
-                xlsx_extractor.extract_stock_info(file_content)
+                stock_infos_in, stock_infos_out = xlsx_extractor.extract_stock_info(file_content)
+            return stock_infos_in, stock_infos_out
 
     except Exception as e:
         print(f"Failed to retrieve data from CSIndex website: {e}")

@@ -2,8 +2,11 @@
 # including total_cnt, page_size, size, currentPage, status etc
 from dataclasses import dataclass
 from typing import List, Any
-from datetime import datetime
+from datetime import datetime, date
 from data.serializable import Serializable
+from extractor.pdf_extractor import PDFExtractor
+from extractor.xlsx_extractor import XLSXExtractor
+from reader.reader import Reader
 import json
 
 @dataclass
@@ -15,6 +18,8 @@ class Announcement(Serializable):
     file_name: str
     valid_time: datetime
     announcement_set: 'AnnouncementSet'
+    stock_infos_in: Any = None
+    stock_infos_out: Any = None
 
     def to_dict(self):
         return {
@@ -37,6 +42,29 @@ class Announcement(Serializable):
             valid_time=datetime.fromisoformat(dictionary.get("valid_time")) if dictionary.get("valid_time") else None,
             announcement_set=None  # This should be set separately if needed
         )
+    
+    def get_stock_info(self):
+        stock_infos_in, stock_infos_out = None, None
+
+        def get_stock_by_file(file_name):
+            file_suffix = file_name.split(".")[-1]
+            file_content = Reader(file_name).content
+            if file_suffix == "pdf":
+                pdf_extractor = PDFExtractor(self)    
+                stock_infos_in, stock_infos_out = pdf_extractor.extract_stock_info(file_content)
+            elif file_suffix == "xlsx":
+                xlsx_extractor = XLSXExtractor(self)
+                stock_infos_in, stock_infos_out = xlsx_extractor.extract_stock_info(file_content)
+            return stock_infos_in, stock_infos_out
+
+        def get_stock_by_net():
+            # return announcement_handler(self)
+            pass
+        
+        if self.file_name is None:
+            self.stock_infos_in, self.stock_infos_out = get_stock_by_net()
+        else:
+            self.stock_infos_in, self.stock_infos_out = get_stock_by_file(self.file_name)
 
 @dataclass
 class AnnouncementSet(Serializable):
@@ -73,6 +101,25 @@ class AnnouncementSet(Serializable):
         for annoucement in current_cls.announcements:
             annoucement.announcement_set = current_cls
         return current_cls
+    
+    def get_annoucement(self, **kwargs):
+        if "valid_date" in kwargs:
+            return self.__get_annoucement_by_valid_date(kwargs['valid_date'])
+        if "annoucement_date" in kwargs:
+            return self.__get_annoucement_by_annoucement_date(kwargs['annoucement_date'])
+        return None
+
+    def __get_annoucement_by_valid_date(self, valid_date: date):
+        for annoucement in self.announcements:
+            if annoucement.valid_time.date() == valid_date:
+                return annoucement
+        return None
+    
+    def __get_annoucement_by_annoucement_date(self, annoucement_date: date):
+        for annoucement in self.announcements:
+            if annoucement.announcement_time.date() == annoucement_date:
+                return annoucement
+        return None
 
 
 if __name__ == "__main__":
@@ -86,3 +133,8 @@ if __name__ == "__main__":
 
     # Print the object to verify
     print(announcement_set)
+
+    announcement = announcement_set.get_annoucement(valid_date=date(2024, 12, 13))
+    announcement.get_stock_info()
+    print(announcement.stock_infos_in)
+    print(announcement.stock_infos_out)

@@ -3,7 +3,7 @@ import akshare as ak
 from datetime import date
 from typing import List
 from dataclasses import dataclass
-from serializable import Serializable
+from data.serializable import Serializable
 
 @dataclass
 class Stock(Serializable):
@@ -44,13 +44,12 @@ class Stock(Serializable):
         else:
             start_date = kwargs['start_date']
             end_date = kwargs['end_date']
-            stock_per_day = self.get_stock_per_day(start_date, end_date)
-        
-        self.days = []
+            stock_per_day = self.__get_stock_per_day(start_date, end_date)
+        self.days: List[Stock.StockPerDay] = []
         for index, row in stock_per_day.iterrows():
             self.days.append(self.StockPerDay(row['日期'], row['开盘'], row['收盘'], row['最高'], row['最低'], row['成交量']))
     
-    def get_stock_per_day(self, start_date: date, end_date: date):
+    def __get_stock_per_day(self, start_date: date, end_date: date):
         start_date_str = start_date.strftime('%Y%m%d')
         end_date_str = end_date.strftime('%Y%m%d')
         stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="")

@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from datetime import date
+from typing import List
 from bisect import bisect_left, bisect_right
 
 class BaseMarketDay:
@@ -27,7 +28,7 @@ class BaseMarketDay:
             dates.to_csv(file_path, index=False, header=False, encoding='utf-8')
     
     @staticmethod
-    def get_market_days(start_date: date, *args):
+    def get_market_days(start_date: date, *args) -> List[date]:
         if BaseMarketDay._market_days is None:
             BaseMarketDay.__get_market_day()
         assert len(args) == 1, "Invalid number of arguments"
@@ -51,8 +52,7 @@ class BaseMarketDay:
             # Perform binary search to find the start date index
             left = bisect_left(dates, start_date_str)
             right = bisect_right(dates, end_date_str)
-
-            return dates[left:right].tolist()
+            return [pd.to_datetime(d).date() for d in dates[left:right]]
         else:
             raise ValueError("Invalid argument type")
 
