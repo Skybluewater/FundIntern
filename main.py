@@ -1,4 +1,10 @@
 import akshare as ak
+from extractor import Extractor
+from announcement import Announcement
+
+announcement = Announcement(None)
+extractor = Extractor(announcement)
+announcement.extractor = extractor
 
 stock_zh_index_daily_df = ak.stock_zh_index_daily(symbol="sh000001")
 print(stock_zh_index_daily_df)
