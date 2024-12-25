@@ -1,7 +1,7 @@
 from data.announcement import Announcement, AnnouncementSet
 from data.stock import Stock
 from data.market_day import MarketDay
-from datetime import date
+from datetime import date, timedelta
 from reader.reader import Reader
 
 class AnnouncementSetHandler:
@@ -59,5 +59,13 @@ if __name__ == "__main__":
     annoucement_set_handler = AnnouncementSetHandler("上证50.json")
     for annoucement in annoucement_set_handler.get_annoucement():
         annoucement.get_stock_info()
+        stock_infos_in = annoucement.stock_infos_in
         print(annoucement.stock_infos_in)
-        print(annoucement.stock_infos_out)
+        for i in stock_infos_in["证券代码"]:
+            # stock_handler = StockHandler(i, start_date=annoucement.valid_time, end_date=annoucement.valid_time + timedelta(days=10))
+            stock_handler = StockHandler(i, start_date=annoucement.announcement_time, n_days=30)
+            print(stock_handler.cal_stock())
+            last_date = MarketDay.get_market_days(annoucement.valid_time, 30)[-1]
+            stock_handler = StockHandler(i, start_date=annoucement.announcement_time, end_date=last_date)
+            print(stock_handler.cal_stock())
+        break

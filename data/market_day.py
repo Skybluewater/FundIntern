@@ -42,7 +42,7 @@ class BaseMarketDay:
 
             # Get the period dates
             end_index = min(left + period, len(dates))
-            return dates[left:end_index].tolist()
+            return [pd.to_datetime(d).date() for d in dates[left:end_index]]
         elif isinstance(args[0], date):
             end_date = args[0]
             start_date_str = start_date.isoformat()

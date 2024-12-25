@@ -16,6 +16,7 @@ class Stock(Serializable):
             self.high = high
             self.low = low
             self.volume = volume
+            self.raw_data = None
         
         def to_dict(self):
             return {
@@ -45,6 +46,7 @@ class Stock(Serializable):
             start_date = kwargs['start_date']
             end_date = kwargs['end_date']
             stock_per_day = self.__get_stock_per_day(start_date, end_date)
+            self.raw_data = stock_per_day
         self.days: List[Stock.StockPerDay] = []
         for index, row in stock_per_day.iterrows():
             self.days.append(self.StockPerDay(row['日期'], row['开盘'], row['收盘'], row['最高'], row['最低'], row['成交量']))
