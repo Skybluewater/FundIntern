@@ -39,9 +39,9 @@ for annoucement in annoucement_set_handler.get_annoucement():
         stock_name = stock_handler.stock.stock_name
         plt.title(f'{i}-{stock_name} {buy_date.isoformat()}至{end_date.isoformat()}收盘价走势')
         # Emphasize the begin date and end date
-        plt.axvline(x=buy_date, color='g', linestyle='--', label='买入')
-        plt.axvline(x=sell_date, color='r', linestyle='--', label=f'卖出, 收益率{rate:.2%}')
-        plt.axvline(x=valid_date, color='b', linestyle='--', label=f'生效日')
+        plt.axvline(x=buy_date, color='g', linestyle='--', label='买入日{}'.format(buy_date.isoformat()))
+        plt.axvline(x=sell_date, color='r', linestyle='--', label=f'卖出日{sell_date.isoformat()}, 收益率{rate:.2%}')
+        plt.axvline(x=valid_date, color='b', linestyle='--', label=f'生效日{valid_date.isoformat()}')
         plt.legend()
         plt.grid(True)
         plt.xticks(rotation=45)
