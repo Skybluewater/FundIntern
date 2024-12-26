@@ -97,7 +97,9 @@ def annoucement_handler(announcement: Announcement):
         if match:
             chinese_date = match.group()
             english_date = chinese_date.replace("年", "-").replace("月", "-").replace("日", "")
-            announcement.valid_time = datetime.strptime(english_date, "%Y-%m-%d")
+            from data.market_day import MarketDay
+            market_days = MarketDay.get_market_days(datetime.strptime(english_date, "%Y-%m-%d").date(), 2)
+            announcement.valid_time = market_days[-1]
 
         # Check for PDF link
         file_link = weditor.find('a', href=re.compile(r'.*\.(pdf|xlsx)$'))

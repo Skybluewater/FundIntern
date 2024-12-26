@@ -28,7 +28,7 @@ class Announcement(Serializable):
             "id": self.id,
             "content": self.content,
             "file_name": self.file_name,
-            "valid_time": self.valid_time.date().isoformat() if self.valid_time else None,
+            "valid_time": self.valid_time.isoformat() if self.valid_time else None,
         }
     
     @classmethod

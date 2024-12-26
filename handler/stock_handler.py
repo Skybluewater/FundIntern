@@ -75,11 +75,13 @@ class StockHandler:
         return highest_date, highest_price, lowest_date, lowest_price
 
 if __name__ == "__main__":
-    annoucement_set_handler = AnnouncementSetHandler("上证50.json")
-    for annoucement in annoucement_set_handler.get_annoucement(valid_time=date(2022, 12, 9)):
+    annoucement_set_handler = AnnouncementSetHandler("上证180.json")
+    for annoucement in annoucement_set_handler.get_annoucement():
         annoucement.get_stock_info()
         stock_infos_in = annoucement.stock_infos_in
         print(annoucement.stock_infos_in)
+        print("生效日期: " + annoucement.valid_time.date().isoformat())
+        print("发布日期: " + annoucement.announcement_time.date().isoformat())
         for i in stock_infos_in["证券代码"]:
             # stock_handler = StockHandler(i, start_date=annoucement.valid_time, end_date=annoucement.valid_time + timedelta(days=10))
             stock_handler = StockHandler(i, start_date=annoucement.announcement_time, n_days=30)
