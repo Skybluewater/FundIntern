@@ -70,8 +70,8 @@ class StockHandler:
         It determines the best buy and sell dates to maximize the reward rate.
         Args:
             **kwargs: Arbitrary keyword arguments. 
-                      - buy_date (optional): A specific date to start calculating the reward rate from.
-                      - first_sell_date (optional): A specific date to start calculating the reward rate.
+                      - announcement_date (optional): A specific date to start calculating the reward rate from.
+                      - valid_date (optional): A specific date to start calculating the reward rate.
         Returns:
             tuple: A tuple containing:
                 - reward_rate_rough (float): The calculated rough reward rate.

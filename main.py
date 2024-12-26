@@ -32,7 +32,7 @@ def save_image_per_stock(stock_code, stock_handler, buy_date, sell_date, valid_d
     
     plt.title(f'{stock_code}-{stock_name} {buy_date.isoformat()}至{end_date.isoformat()}收盘价走势')
 
-    index_rate = index_handler.get_reward_rate(buy_date, sell_date)
+    index_rate = index_handler.rate
     # Emphasize the begin date and end date
     line1 = ax1.axvline(x=buy_date, color='g', linestyle='--', label='买入日{}'.format(buy_date.isoformat()))
     line2 = ax1.axvline(x=sell_date, color='r', linestyle='--', label=f'卖出日{sell_date.isoformat()}, 股票收益率{rate:.2%}')
@@ -89,6 +89,7 @@ def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: An
     print("发布日期: " + annoucement.announcement_time.isoformat())
     index_handler = StockHandler(args.index, start_date=annoucement.announcement_time, n_days=30, 
                                     announcement=annoucement, announcement_set_handler=annoucement_set_handler)
+    index_handler.cal_reward_rate(announcement_date=annoucement.announcement_time, valid_date=annoucement.valid_time)
     for i in stock_infos_in["证券代码"]:
         stock_handler, rate, *_ = get_per_stock_reward_rate(i, annoucement, annoucement_set_handler, index_handler)
         stock_dic[i] = (stock_handler, rate)
