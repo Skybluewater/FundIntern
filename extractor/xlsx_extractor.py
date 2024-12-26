@@ -27,6 +27,8 @@ class XLSXExtractor(BaseExtractor):
         
         stock_infos_in = handle_sheet("调入")
         stock_infos_out = handle_sheet("调出")
+        stock_infos_in['证券代码'] = stock_infos_in['证券代码'].astype(str)
+        stock_infos_out['证券代码'] = stock_infos_out['证券代码'].astype(str)
         return stock_infos_in, stock_infos_out
 
 

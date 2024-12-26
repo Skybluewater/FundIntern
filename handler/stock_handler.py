@@ -10,9 +10,19 @@ class AnnouncementSetHandler:
         self.reader = Reader(file_path)
         self.annoucement_set = AnnouncementSet.from_dict(self.reader.content)
     
-    def get_annoucement(self):
-        for annoucement in self.annoucement_set.announcements:
-            yield annoucement
+    def get_annoucement(self, **kwargs):
+        if kwargs:
+            if "announcement_time" in kwargs:
+                for annoucement in self.annoucement_set.announcements:
+                    if annoucement.announcement_time.date() == kwargs['announcement_time']:
+                        yield annoucement
+            elif "valid_time" in kwargs:
+                for annoucement in self.annoucement_set.announcements:
+                    if annoucement.valid_time.date() == kwargs['valid_time']:
+                        yield annoucement
+        else:
+            for annoucement in self.annoucement_set.announcements:
+                yield annoucement
 
 
 class AnnouncementHandler:
@@ -40,8 +50,17 @@ class StockHandler:
     def __get_period_stock_info(self, start_date: date, n_days: int):
         market_days = MarketDay.get_market_days(start_date, n_days)
         return Stock(stock_code=self.stock_code, start_date=market_days[0], end_date=market_days[-1])
+
+    def __is_valid(self):
+        if not self.stock or not self.stock.days or len(self.stock.days) == 0:
+            return False
+        if not self.announcement:
+            return False
+        return True
     
     def cal_stock(self):
+        if not self.stock.is_valid():
+            return None
         highest_date = self.stock.days[0].date
         highest_price = self.stock.days[0].high
         lowest_date = self.stock.days[0].date
@@ -57,7 +76,7 @@ class StockHandler:
 
 if __name__ == "__main__":
     annoucement_set_handler = AnnouncementSetHandler("上证50.json")
-    for annoucement in annoucement_set_handler.get_annoucement():
+    for annoucement in annoucement_set_handler.get_annoucement(valid_time=date(2022, 12, 9)):
         annoucement.get_stock_info()
         stock_infos_in = annoucement.stock_infos_in
         print(annoucement.stock_infos_in)
@@ -68,4 +87,4 @@ if __name__ == "__main__":
             last_date = MarketDay.get_market_days(annoucement.valid_time, 30)[-1]
             stock_handler = StockHandler(i, start_date=annoucement.announcement_time, end_date=last_date)
             print(stock_handler.cal_stock())
-        break
+        # break

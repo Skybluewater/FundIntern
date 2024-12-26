@@ -37,8 +37,11 @@ class Stock(Serializable):
         if "stock_name" in kwargs:
             self.stock_name = kwargs['stock_name']
         else:
-            stock_individual_info_em_df = ak.stock_individual_info_em(symbol=stock_code)
-            self.stock_name = stock_individual_info_em_df.iloc[1]['value']
+            try:
+                stock_individual_info_em_df = ak.stock_individual_info_em(symbol=stock_code)
+                self.stock_name = stock_individual_info_em_df.iloc[1]['value']
+            except Exception as e:
+                print(f"Failed to retrieve stock individual info: {e}")
         
         if "start_date" not in kwargs or "end_date" not in kwargs:
             raise ValueError("start_date and end_date must be provided")
@@ -54,8 +57,15 @@ class Stock(Serializable):
     def __get_stock_per_day(self, start_date: date, end_date: date):
         start_date_str = start_date.strftime('%Y%m%d')
         end_date_str = end_date.strftime('%Y%m%d')
-        stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="")
+        try:
+            stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="")
+        except Exception as e:
+            print(f"Failed to retrieve stock history: {e}")
+            return pd.DataFrame()
         return stock_zh_a_hist_df
+    
+    def is_valid(self):
+        return self.days is not None and len(self.days) > 0
 
     def to_dict(self):
         return {
