@@ -98,7 +98,10 @@ def annoucement_handler(announcement: Announcement):
             chinese_date = match.group()
             english_date = chinese_date.replace("年", "-").replace("月", "-").replace("日", "")
             from data.market_day import MarketDay
-            market_days = MarketDay.get_market_days(datetime.strptime(english_date, "%Y-%m-%d").date(), 2)
+            if "收盘" in announcement.content:
+                market_days = MarketDay.get_market_days(datetime.strptime(english_date, "%Y-%m-%d").date(), 2)
+            else:
+                market_days = [datetime.strptime(english_date, "%Y-%m-%d").date()]
             announcement.valid_time = market_days[-1]
 
         # Check for PDF link
