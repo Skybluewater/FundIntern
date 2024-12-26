@@ -64,5 +64,5 @@ class MarketDay(BaseMarketDay):
 
 if __name__ == "__main__":
     market_day = MarketDay()
-    print(market_day.get_market_days(date(2021, 1, 5), 10))
-    print(market_day.get_market_days(date(2021, 1, 5), date(2021, 1, 15)))
+    print(market_day.get_market_days(date(2024, 11, 29), 10))
+    print(market_day.get_market_days(date(2024, 11, 29), date(2024, 12, 15)))

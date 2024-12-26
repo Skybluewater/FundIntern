@@ -1,15 +1,15 @@
-import akshare as ak
-from extractor import Extractor
-from announcement import Announcement
+from data.announcement import Announcement, AnnouncementSet
+from handler.stock_handler import StockHandler, AnnouncementSetHandler
+from data.market_day import MarketDay
 
-announcement = Announcement(None)
-extractor = Extractor(announcement)
-announcement.extractor = extractor
-
-stock_zh_index_daily_df = ak.stock_zh_index_daily(symbol="sh000001")
-print(stock_zh_index_daily_df)
-stock_individual_info_em_df = ak.stock_individual_info_em(symbol="000001")
-print(stock_individual_info_em_df)
-#https://akshare.akfamily.xyz/data/stock/stock.html#id21
-stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol="000001", period="daily", start_date="20170301", end_date='20240528', adjust="")
-print(stock_zh_a_hist_df)
+annoucement_set_handler = AnnouncementSetHandler("上证50.json")
+for annoucement in annoucement_set_handler.get_annoucement():
+    annoucement.get_stock_info()
+    stock_infos_in = annoucement.stock_infos_in
+    print(annoucement.stock_infos_in)
+    print("生效日期: " + annoucement.valid_time.isoformat())
+    print("发布日期: " + annoucement.announcement_time.isoformat())
+    for i in stock_infos_in["证券代码"]:
+        stock_handler = StockHandler(i, start_date=annoucement.announcement_time, n_days=30, 
+                                        announcement=annoucement, announcement_set_handler=annoucement_set_handler)
+        print(stock_handler.cal_reward_rate(buy_date=annoucement.announcement_time))

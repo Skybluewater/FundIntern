@@ -35,11 +35,11 @@ class Announcement(Serializable):
     def from_dict(cls, dictionary):
         return cls(
             headline=dictionary.get("headline"),
-            announcement_time=datetime.fromisoformat(dictionary.get("ann_time")),
+            announcement_time=datetime.fromisoformat(dictionary.get("ann_time")).date(),
             id=dictionary.get("id"),
             content=dictionary.get("content"),
             file_name=dictionary.get("file_name"),
-            valid_time=datetime.fromisoformat(dictionary.get("valid_time")) if dictionary.get("valid_time") else None,
+            valid_time=datetime.fromisoformat(dictionary.get("valid_time")).date() if dictionary.get("valid_time") else None,
             announcement_set=None  # This should be set separately if needed
         )
     

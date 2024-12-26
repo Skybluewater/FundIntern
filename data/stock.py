@@ -54,6 +54,12 @@ class Stock(Serializable):
         for index, row in stock_per_day.iterrows():
             self.days.append(self.StockPerDay(row['日期'], row['开盘'], row['收盘'], row['最高'], row['最低'], row['成交量']))
     
+    def get_stock_by_date(self, date: date):
+        for day in self.days:
+            if day.date == date:
+                return day
+        raise ValueError(f"Stock data not found for date: {date}")
+
     def __get_stock_per_day(self, start_date: date, end_date: date):
         start_date_str = start_date.strftime('%Y%m%d')
         end_date_str = end_date.strftime('%Y%m%d')
