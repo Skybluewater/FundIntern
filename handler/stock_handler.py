@@ -36,6 +36,9 @@ class StockHandler:
     def __init__(self, stock_code, **kwargs):
         self.stock_code = stock_code
         self.stock = None
+        self.rate = 0
+        self.buy_date = None
+        self.sell_date = None
         self.announcement = kwargs["announcement"] if "announcement" in kwargs else None
         self.announcement_set_handler = kwargs["announcement_set_handler"] if "announcement_set_handler" in kwargs else None
         if "start_date" in kwargs and "end_date" in kwargs:
@@ -68,11 +71,12 @@ class StockHandler:
         Args:
             **kwargs: Arbitrary keyword arguments. 
                       - buy_date (optional): A specific date to start calculating the reward rate from.
+                      - first_sell_date (optional): A specific date to start calculating the reward rate.
         Returns:
             tuple: A tuple containing:
                 - reward_rate_rough (float): The calculated rough reward rate.
                 - buy_date (datetime.date or None): The date to buy the stock to achieve the reward rate.
-                - sell_date (datetime.date or None): The date to sell the stock to achieve the reward rate.
+                - valid_date (datetime.date or None): The date to sell the stock to achieve the reward rate.
         """
         if not self.__is_valid():
             return None
@@ -80,11 +84,13 @@ class StockHandler:
         buy_date = None
         sell_date = None
         potential_buy_date = None
-        if "buy_date" in kwargs:
-            lowest_price = self.stock.get_stock_by_date(kwargs['buy_date']).close
-            potential_buy_date = kwargs['buy_date']
+        if "announcement_date" and "valid_date" in kwargs:
+            announcement_date = kwargs['announcement_date']
+            valid_date = kwargs['valid_date']
+            lowest_price = self.stock.get_stock_by_date(valid_date).close
+            potential_buy_date = valid_date
             for day in self.stock.days:
-                if day.date < kwargs['buy_date']:
+                if day.date < valid_date:
                     continue
                 reward_rate_rough_temp = (day.close - lowest_price) / lowest_price
                 if reward_rate_rough_temp > reward_rate_rough:
@@ -103,8 +109,13 @@ class StockHandler:
                     buy_date = potential_buy_date
                     sell_date = day.date
                     reward_rate_rough = reward_rate_rough_temp
+        self.rate = reward_rate_rough
+        self.buy_date = buy_date
+        self.sell_date = sell_date
         return reward_rate_rough, buy_date, sell_date
 
+    def get_reward_rate(self, start_date: date, end_date: date):
+        return (self.stock.get_stock_by_date(end_date).close - self.stock.get_stock_by_date(start_date).close) / self.stock.get_stock_by_date(start_date).close
     
     def cal_stock(self):
         if not self.stock.is_valid():

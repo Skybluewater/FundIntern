@@ -9,8 +9,8 @@ from data.serializable import Serializable
 class Stock(Serializable):
     @dataclass
     class StockPerDay(Serializable):
-        def __init__(self, date, open, close, high, low, volume):
-            self.date: date = date
+        def __init__(self, _date, open, close, high, low, volume):
+            self.date: date = _date if isinstance(_date, date) else date.fromisoformat(_date)
             self.open = open
             self.close = close
             self.high = high
@@ -66,8 +66,10 @@ class Stock(Serializable):
         try:
             stock_zh_a_hist_df = ak.stock_zh_a_hist(symbol=self.stock_code, period="daily", start_date=start_date_str, end_date=end_date_str, adjust="")
         except Exception as e:
-            print(f"Failed to retrieve stock history: {e}")
-            return pd.DataFrame()
+            print(f"Failed to retrieve stock history: {e}, trying to retrieve stock index history")
+            stock_zh_a_hist_df = ak.stock_zh_index_daily_em(symbol="sh000001", start_date=start_date_str, end_date=end_date_str)
+            stock_zh_a_hist_df.columns = ['日期', '开盘', '收盘', '最高', '最低', '成交量', '成交额']
+            stock_zh_a_hist_df['日期'] = pd.to_datetime(stock_zh_a_hist_df['日期']).dt.date
         return stock_zh_a_hist_df
     
     def is_valid(self):
@@ -76,7 +78,7 @@ class Stock(Serializable):
     def to_dict(self):
         return {
             "stock_code": self.stock_code,
-            "stock_name": self.stock_name,
+            "stock_name": self.stock_name if hasattr(self, 'stock_name') else None,
             "days": [day.to_dict() for day in self.days]
         }
     
@@ -84,6 +86,8 @@ class Stock(Serializable):
         return super().from_dict(dictionary)
 
 if __name__ == "__main__":
-    stock = Stock("000001", start_date=date(2021, 1, 1), end_date=date(2021, 1, 10))
+    # stock = Stock("000001", start_date=date(2021, 1, 1), end_date=date(2021, 1, 10))
+    # print(stock.to_dict())
+    stock = Stock("sh000001", start_date=date(2021, 1, 1), end_date=date(2021, 1, 10))
     print(stock.to_dict())
-    #checksshkey
+    print(type(stock.raw_data))
