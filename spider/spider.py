@@ -11,6 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from io import BytesIO
 from extractor.pdf_extractor import PDFExtractor
 from extractor.xlsx_extractor import XLSXExtractor
+from bs4 import BeautifulSoup
 
 
 chrome_options = Options()
@@ -70,8 +71,20 @@ def annoucement_handler(announcement: Announcement):
         import time
         time.sleep(1)
         driver.implicitly_wait(2)
-        weditor = driver.find_element(By.CLASS_NAME, "weditor")
-        announcement.content = weditor.text
+        
+        # Fetch the element tree
+        page_source = driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+        
+        try:
+            weditor = soup.find(class_="weditor")
+            if weditor is None:
+                weditor = soup.find(class_="content-wrap w center")
+        except:
+            # TODO: Handle the case where the element is not found
+            weditor = soup.find(class_="main-w mt80 pb120")
+        
+        announcement.content = weditor.get_text()
         stock_infos_in, stock_infos_out = None, None
 
         import re
@@ -87,9 +100,9 @@ def annoucement_handler(announcement: Announcement):
             announcement.valid_time = datetime.strptime(english_date, "%Y-%m-%d")
 
         # Check for PDF link
-        file_link = weditor.find_element(By.XPATH, ".//a[contains(@href, '.pdf') or contains(@href, '.xlsx')]")
+        file_link = weditor.find('a', href=re.compile(r'.*\.(pdf|xlsx)$'))
         if file_link:
-            file_url = file_link.get_attribute("href")
+            file_url = file_link['href']
             file_suffix = file_url.split(".")[-1]
 
             def download_file():
