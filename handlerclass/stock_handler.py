@@ -1,8 +1,8 @@
-from data.announcement import Announcement, AnnouncementSet
-from data.stock import Stock
-from data.market_day import MarketDay
+from dataclass.announcement import Announcement, AnnouncementSet
+from dataclass.stock import Stock
+from toolclass.market_day.market_day import MarketDay
 from datetime import date, timedelta
-from reader.reader import Reader
+from toolclass.reader.reader import Reader
 
 class AnnouncementSetHandler:
     def __init__(self, file_path):
@@ -11,6 +11,18 @@ class AnnouncementSetHandler:
         self.annoucement_set = AnnouncementSet.from_dict(self.reader.content)
     
     def get_annoucement(self, **kwargs):
+        """
+        Retrieve announcements based on provided filters.
+        This method yields announcements from the announcement set based on the 
+        specified filter criteria. If no filters are provided, all announcements 
+        are yielded.
+        Parameters:
+        **kwargs: Arbitrary keyword arguments.
+            - announcement_time (datetime.date): Filter announcements by their announcement date.
+            - valid_time (datetime.date): Filter announcements by their valid date.
+        Yields:
+        Announcement: An announcement object that matches the filter criteria.
+        """
         if kwargs:
             if "announcement_time" in kwargs:
                 for annoucement in self.annoucement_set.announcements:
@@ -23,13 +35,6 @@ class AnnouncementSetHandler:
         else:
             for annoucement in self.annoucement_set.announcements:
                 yield annoucement
-
-
-class AnnouncementHandler:
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.reader = Reader(file_path)
-        self.annoucement = Announcement.from_dict(self.reader.content)
 
 
 class StockHandler:

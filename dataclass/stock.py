@@ -3,7 +3,7 @@ import akshare as ak
 from datetime import date
 from typing import List
 from dataclasses import dataclass
-from data.serializable import Serializable
+from dataclass.serializableI import Serializable
 
 @dataclass
 class Stock(Serializable):

@@ -3,10 +3,10 @@
 from dataclasses import dataclass
 from typing import List, Any
 from datetime import datetime, date
-from data.serializable import Serializable
-from extractor.pdf_extractor import PDFExtractor
-from extractor.xlsx_extractor import XLSXExtractor
-from reader.reader import Reader
+from dataclass.serializableI import Serializable
+from toolclass.extractor.pdf_extractor import PDFExtractor
+from toolclass.extractor.xlsx_extractor import XLSXExtractor
+from toolclass.reader.reader import Reader
 import json
 
 @dataclass
@@ -110,8 +110,12 @@ class AnnouncementSet(Serializable):
         return None
 
     def __get_annoucement_by_valid_date(self, valid_date: date):
+        if isinstance(valid_date, str):
+            valid_date = datetime.fromisoformat(valid_date).date()
+        elif isinstance(valid_date, datetime):
+            valid_date = valid_date.date()
         for annoucement in self.announcements:
-            if annoucement.valid_time.date() == valid_date:
+            if annoucement.valid_time == valid_date:
                 return annoucement
         return None
     
@@ -125,7 +129,7 @@ class AnnouncementSet(Serializable):
 if __name__ == "__main__":
     # Test the to_dict and from_dict methods
     # Read the JSON file
-    with open('./上证50.json', 'r') as file:
+    with open('上证50.json', 'r') as file:
         data = json.load(file)
 
     # Initialize an AnnouncementSet object using from_dict method

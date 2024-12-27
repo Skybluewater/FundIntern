@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from data.serializable import Serializable
+from dataclass.serializableI import Serializable
 
 class BaseExtractor(Serializable, ABC):
     def __init__(self, announcement):

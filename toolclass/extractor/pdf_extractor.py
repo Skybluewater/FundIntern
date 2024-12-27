@@ -1,4 +1,4 @@
-from extractor.base_extractor import BaseExtractor
+from toolclass.extractor.base_extractor import BaseExtractor
 from PyPDF2 import PdfReader
 from typing import List
 import tabula
@@ -95,6 +95,6 @@ class PDFExtractor(BaseExtractor):
         return stock_infos_in, stock_infos_out
 
 if __name__ == "__main__":
-    with open("14501.pdf", "rb") as f:
+    with open("14799.pdf", "rb") as f:
         pdf_extractor = PDFExtractor(None)
-        pdf_extractor.extract_stock_info(f)
+        print(pdf_extractor.extract_stock_info(f))

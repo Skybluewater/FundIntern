@@ -1,4 +1,4 @@
-from extractor.base_extractor import BaseExtractor
+from toolclass.extractor.base_extractor import BaseExtractor
 import pandas as pd
 
 class XLSXExtractor(BaseExtractor):
