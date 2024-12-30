@@ -1,8 +1,8 @@
 ## 项目说明
 **工银瑞信实习项目**
-
+> Python 3.9
 ### 使用说明：
-1. > python main.py --name "上证50" --index 000001
+1. > python main.py --name 上证50 --index 000001
     主函数，用于对指数的收益率进行比较和计算
     1. name 是指数名称，如 上证50 上证180 上证380 等
     2. index 是上证指数（沪深300 akshare 没法获取到数据）
@@ -18,7 +18,7 @@
         c. 上证180_reward_table.csv
         `表示指数在过去 5 年调整周期的包含调整的个股和指数的最佳收益率信息`
 
-2. > python toolclass.spider.spider.py --name "上证50"
+2. > python toolclass.spider.spider.py --name 上证50
     辅助函数，爬虫爬取指数调整信息
     1. name 是指数名称，如 上证50 上证180 上证380 等
     2. 此函数将指数对应调整信息存于对应文件夹内，包含附件与 json 类内容
