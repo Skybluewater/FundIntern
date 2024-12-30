@@ -179,8 +179,10 @@ def main():
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
                 weights = {line.split(",")[0]: float(line.split(",")[1]) for line in f}
+            print("Getting weights from storage files")
         else:
             weights = None
+            print("No weight file found, use default weights")
         index_handler, best_rate, max_index_rate = get_stock_reward_rate(annoucement, annoucement_set_handler, weights=weights)
         reward_table.loc[len(reward_table)] = [annoucement.valid_time, index_handler.stock.days[-1].date, best_rate, max_index_rate]
     reward_table.to_csv(os.path.join(os.getcwd(), args.name, f'{args.name}_reward_table.csv'), index=False, header=True)
