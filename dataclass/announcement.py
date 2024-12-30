@@ -43,7 +43,7 @@ class Announcement(Serializable):
             announcement_set=None  # This should be set separately if needed
         )
     
-    def get_stock_info(self):
+    def get_stock_info(self, **kwargs):
         stock_infos_in, stock_infos_out = None, None
 
         def get_stock_by_file(file_name):
@@ -61,10 +61,10 @@ class Announcement(Serializable):
             # return announcement_handler(self)
             pass
         
-        if self.file_name is None:
+        if self.file_name is None or "file_path" not in kwargs:
             self.stock_infos_in, self.stock_infos_out = get_stock_by_net()
         else:
-            self.stock_infos_in, self.stock_infos_out = get_stock_by_file(self.file_name)
+            self.stock_infos_in, self.stock_infos_out = get_stock_by_file(self.file_name if "file_path" not in kwargs else kwargs["file_path"])
 
 @dataclass
 class AnnouncementSet(Serializable):

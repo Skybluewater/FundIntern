@@ -1,3 +1,4 @@
+import os
 from dataclass.announcement import Announcement, AnnouncementSet
 from dataclass.stock import Stock
 from toolclass.market_day.market_day import MarketDay
@@ -92,14 +93,13 @@ class StockHandler:
         if "announcement_date" and "valid_date" in kwargs:
             announcement_date = kwargs['announcement_date']
             valid_date = kwargs['valid_date']
-            lowest_price = self.stock.get_stock_by_date(valid_date).close
-            potential_buy_date = valid_date
+            lowest_price = self.stock.get_stock_by_date(announcement_date).close
+            buy_date = announcement_date
             for day in self.stock.days:
                 if day.date < valid_date:
                     continue
                 reward_rate_rough_temp = (day.close - lowest_price) / lowest_price
                 if reward_rate_rough_temp > reward_rate_rough:
-                    buy_date = potential_buy_date
                     sell_date = day.date
                     reward_rate_rough = reward_rate_rough_temp
         else:
@@ -139,13 +139,14 @@ class StockHandler:
         return highest_date, highest_price, lowest_date, lowest_price
 
 if __name__ == "__main__":
-    annoucement_set_handler = AnnouncementSetHandler("上证180.json")
+    annoucement_set_handler = AnnouncementSetHandler(os.path.join(os.getcwd(), "上证50", "上证50.json"))
     for annoucement in annoucement_set_handler.get_annoucement():
-        annoucement.get_stock_info()
+        import os
+        annoucement.get_stock_info(file_path="上证50/"+annoucement.file_name)
         stock_infos_in = annoucement.stock_infos_in
         print(annoucement.stock_infos_in)
-        print("生效日期: " + annoucement.valid_time.date().isoformat())
-        print("发布日期: " + annoucement.announcement_time.date().isoformat())
+        print("生效日期: " + annoucement.valid_time.isoformat())
+        print("发布日期: " + annoucement.announcement_time.isoformat())
         for i in stock_infos_in["证券代码"]:
             # stock_handler = StockHandler(i, start_date=annoucement.valid_time, end_date=annoucement.valid_time + timedelta(days=10))
             stock_handler = StockHandler(i, start_date=annoucement.announcement_time, n_days=30, 
@@ -156,4 +157,3 @@ if __name__ == "__main__":
                                          announcement=annoucement, announcement_set_handler=annoucement_set_handler)
             print(stock_handler.cal_stock())
             print(stock_handler.cal_reward_rate())
-        # break

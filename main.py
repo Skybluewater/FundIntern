@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from dataclass.announcement import Announcement, AnnouncementSet
 from handlerclass.stock_handler import StockHandler, AnnouncementSetHandler
 from toolclass.market_day.market_day import MarketDay
+from toolclass.path.path import Path
 
 def parse_args():
     import argparse
@@ -61,7 +62,7 @@ def get_per_stock_reward_rate(stock_code, annoucement: Announcement, annoucement
     end_date = stock_handler.stock.days[-1].date
     valid_date = annoucement.valid_time
     if buy_date is None:
-        buy_date = annoucement.valid_time
+        buy_date = annoucement.announcement_time
     if sell_date is None:
         sell_date = annoucement.valid_time
     
@@ -75,18 +76,20 @@ def get_per_stock_reward_rate_by_date(stock_code, annoucement: Announcement, ann
     else:
         stock_handler = StockHandler(stock_code, start_date=annoucement.announcement_time, n_days=30, 
                                      announcement=annoucement, announcement_set_handler=annoucement_set_handler)
-    rate = stock_handler.get_reward_rate(start_date=annoucement.valid_time, end_date=end_date)
+    rate = stock_handler.get_reward_rate(start_date=annoucement.announcement_time, end_date=end_date)
     return stock_handler, rate
 
 def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: AnnouncementSetHandler, **kwargs):
-    annoucement.get_stock_info()
+    annoucement.get_stock_info(file_path=os.path.join(os.getcwd(), args.name, annoucement.file_name))
     
     stock_infos_in = annoucement.stock_infos_in
     stock_dic = {}
 
+    # get best reward rate
     print(annoucement.stock_infos_in)
     print("生效日期: " + annoucement.valid_time.isoformat())
     print("发布日期: " + annoucement.announcement_time.isoformat())
+    # index reward rate info
     index_handler = StockHandler(args.index, start_date=annoucement.announcement_time, n_days=30, 
                                     announcement=annoucement, announcement_set_handler=annoucement_set_handler)
     index_handler.cal_reward_rate(announcement_date=annoucement.announcement_time, valid_date=annoucement.valid_time)
@@ -105,9 +108,13 @@ def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: An
     
     if "weights" in kwargs and kwargs["weights"] is not None:
         # weights should be a dictionary, key: stock code, value: rate
-        weights = kwargs["weights"]
+        weights = adjust_weights(kwargs["weights"])
     else:
         weights = {i: 1 / len(stock_infos_in["证券代码"]) for i in stock_infos_in["证券代码"]}
+    
+    def adjust_weights(weights):
+        total_weights = sum(weights[i] for i in stock_infos_in["证券代码"])
+        return {i: weights[i] / total_weights for i in stock_infos_in["证券代码"]}
     
     def cal_best_rate():
         best_rate = 0
@@ -122,7 +129,7 @@ def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: An
 
     print(f"最佳收益率: {best_rate:.2%}")
     
-    # Calculate the reward rate of the index
+    # Calculate the reward rate of the index by N market days
     reward_record_table = pd.DataFrame(columns=["n_days", "date", "stock_reward_rate", "index_reward_rate"])
 
     def cal_rate_per_day(end_date):
@@ -134,15 +141,14 @@ def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: An
     
     for idx, day in enumerate(days):
         stock_reward_rate = cal_rate_per_day(day)
-        index_reward_rate = index_handler.get_reward_rate(annoucement.valid_time, day)
+        index_reward_rate = index_handler.get_reward_rate(annoucement.announcement_time, day)
         max_index_rate = max(max_index_rate, index_reward_rate)
         max_stock_rate = max(max_stock_rate, stock_reward_rate)
         print(f"N = {idx} {day.isoformat()} 股票收益率: {stock_reward_rate:.2%}, 指数收益率: {index_reward_rate:.2%}")    
         reward_record_table.loc[idx] = {"n_days": idx, "date": day, "stock_reward_rate": stock_reward_rate, "index_reward_rate": index_reward_rate}
 
     csv_filename = f'{annoucement.valid_time.isoformat()}_{index_handler.stock.days[-1].date.isoformat()}.csv'
-    cwd = os.getcwd()
-    csv_filepath = os.path.join(cwd, args.name, csv_filename)
+    csv_filepath = Path.append_path(args.name, csv_filename)
     os.makedirs(os.path.dirname(csv_filepath), exist_ok=True)
     reward_record_table.to_csv(csv_filepath, index=False, header=True)
 
@@ -164,12 +170,14 @@ def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: An
         
 
 def main():
-    annoucement_set_handler = AnnouncementSetHandler(f"{args.name}.json")
+    annoucement_set_handler = AnnouncementSetHandler(os.path.join(os.getcwd(), args.name, f"{args.name}.json"))
     weights = None
     reward_table = pd.DataFrame(columns=["valid_date", "end_date", "best_rate", "max_index_rate"])
     for annoucement in annoucement_set_handler.get_annoucement():
-        if os.path.exists(annoucement.file_name.split(".")[0] + ".csv"):
-            with open(annoucement.file_name.split(".")[0] + ".csv", "r") as f:
+        file_name = annoucement.file_name.split(".")[0] + ".csv"
+        file_path = os.path.join(os.getcwd(), args.name, file_name)
+        if os.path.exists(file_path):
+            with open(file_path, "r") as f:
                 weights = {line.split(",")[0]: float(line.split(",")[1]) for line in f}
         else:
             weights = None

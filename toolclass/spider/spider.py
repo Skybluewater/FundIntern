@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 from datetime import datetime
 from dataclasses import asdict
 from dataclass.announcement import Announcement, AnnouncementSet
@@ -12,13 +13,14 @@ from io import BytesIO
 from toolclass.extractor.pdf_extractor import PDFExtractor
 from toolclass.extractor.xlsx_extractor import XLSXExtractor
 from toolclass.reader.reader import Reader
+from toolclass.path.path import Path
 from bs4 import BeautifulSoup
 
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")  # Run in headless mode
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-
+cwd = os.getcwd()
 
 def get_announcement(index_name: str, period: str = "5y") -> AnnouncementSet:
 
@@ -49,8 +51,10 @@ def get_announcement(index_name: str, period: str = "5y") -> AnnouncementSet:
                 if item["itemType"] != "announcement" or not any(keyword in item["headline"] for keyword in ["指数定期调整结果的公告", "指数样本的公告"]):
                     continue
                 announcement = Announcement(item["headline"], datetime.strptime(item["itemDate"], "%Y-%m-%d"), item["id"], "", "", None, set)
-                set.announcements.append(announcement)
                 annoucement_handler(announcement)
+                # check if has stock changing info
+                if announcement.file_name:
+                    set.announcements.append(announcement)
         
         else:
             print("Failed to retrieve data from CSIndex website.")
@@ -114,7 +118,9 @@ def annoucement_handler(announcement: Announcement):
             def download_file():
                 response = requests.get(file_url)
                 if response.status_code == 200:
-                    with open(f"{id}.{file_suffix}", "wb") as f:
+                    file_path = Path.append_path(args.name, f"{id}.{file_suffix}")
+                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                    with open(file_path, "wb") as f:
                         f.write(response.content)
                     print(f"Downloaded File: {id}.{file_suffix}")
                     announcement.file_name = f"{id}.{file_suffix}"
@@ -155,7 +161,9 @@ def main(name):
     if announcement_set:
         announcement_json = json.dumps(announcement_set.to_dict(), ensure_ascii=False, indent=4, cls=DateTimeEncoder)
         # save the json file
-        with open(f"{name}.json", "w", encoding='utf-8') as f:
+        file_name = f"{name}.json"
+        file_path = os.path.join(cwd, args.name, file_name)
+        with open(file_path, "w", encoding='utf-8') as f:
             f.write(announcement_json)
 
 if __name__ == "__main__":
@@ -163,6 +171,8 @@ if __name__ == "__main__":
         import argparse
         parser = argparse.ArgumentParser(description="Fetch and process announcements.")
         parser.add_argument("--name", type=str, required=True, help="Index name to search for announcements.")
+        parser.add_argument("--save_image", type=str, help="Valid date of the announcement.")
+        parser.add_argument("--index", type=str, help="Index code to compare.")
         return parser.parse_args()
 
     args = parse_args()
