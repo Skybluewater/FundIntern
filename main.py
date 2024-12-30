@@ -172,7 +172,7 @@ def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: An
 def main():
     annoucement_set_handler = AnnouncementSetHandler(os.path.join(os.getcwd(), args.name, f"{args.name}.json"))
     weights = None
-    reward_table = pd.DataFrame(columns=["valid_date", "end_date", "best_rate", "max_index_rate"])
+    reward_table = pd.DataFrame(columns=["生效日期", "交易结束", "最优交易回报率", "最高指数回报率"])
     for annoucement in annoucement_set_handler.get_annoucement():
         file_name = annoucement.file_name.split(".")[0] + ".csv"
         file_path = os.path.join(os.getcwd(), args.name, file_name)
@@ -183,7 +183,7 @@ def main():
             weights = None
         index_handler, best_rate, max_index_rate = get_stock_reward_rate(annoucement, annoucement_set_handler, weights=weights)
         reward_table.loc[len(reward_table)] = [annoucement.valid_time, index_handler.stock.days[-1].date, best_rate, max_index_rate]
-    reward_table.to_csv(f'{args.name}_reward_table.csv', index=False, header=True)
+    reward_table.to_csv(os.path.join(os.getcwd(), args.name, f'{args.name}_reward_table.csv'), index=False, header=True)
 
 if __name__ == "__main__":
     main()

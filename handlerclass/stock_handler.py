@@ -120,7 +120,11 @@ class StockHandler:
         return reward_rate_rough, buy_date, sell_date
 
     def get_reward_rate(self, start_date: date, end_date: date):
-        return (self.stock.get_stock_by_date(end_date).close - self.stock.get_stock_by_date(start_date).close) / self.stock.get_stock_by_date(start_date).close
+        try:
+            return (self.stock.get_stock_by_date(end_date).close - self.stock.get_stock_by_date(start_date).close) / self.stock.get_stock_by_date(start_date).close
+        except Exception as e:
+            print(f"Failed to fetch market date: {end_date} or {start_date} for stock {self.stock.stock_name}, return 0 as a placeholder")
+            return 0
     
     def cal_stock(self):
         if not self.stock.is_valid():
