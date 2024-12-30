@@ -106,15 +106,15 @@ def get_stock_reward_rate(annoucement: Announcement, annoucement_set_handler: An
         if day.date >= annoucement.valid_time:
             days.append(day.date)
     
+    def adjust_weights(weights):
+        total_weights = sum(weights[i] for i in stock_infos_in["证券代码"])
+        return {i: weights[i] / total_weights for i in stock_infos_in["证券代码"]}
+    
     if "weights" in kwargs and kwargs["weights"] is not None:
         # weights should be a dictionary, key: stock code, value: rate
         weights = adjust_weights(kwargs["weights"])
     else:
         weights = {i: 1 / len(stock_infos_in["证券代码"]) for i in stock_infos_in["证券代码"]}
-    
-    def adjust_weights(weights):
-        total_weights = sum(weights[i] for i in stock_infos_in["证券代码"])
-        return {i: weights[i] / total_weights for i in stock_infos_in["证券代码"]}
     
     def cal_best_rate():
         best_rate = 0
